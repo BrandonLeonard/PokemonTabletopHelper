@@ -17,6 +17,10 @@
 # window.mainloop()
 
 
+def nick():
+    nick = Trainer('Nick')
+    createStandardPokes(nick)
+
 def modifier(targets=False, weather=1, critical=False, roll=12, STAB=False, typeEff=1, other=1):
     targetnum = 1
     criticalnum = 1
@@ -127,24 +131,30 @@ class Trainer(object):
 class Pokemon(object):
     """docstring for Pokemon"""
 
-    def __init__(self, species = '', nickname = '', ability = ''):
+    def __init__(self, species = '', type1='', type2='', nickname = '', ability = ''):
         super(Pokemon, self).__init__()
         self.species = species
         self.nickname = nickname
+        self.type1 = type1
+        self.type2 = type2
         self.ability = ability
         self.stats = Stats()
         self.ivs = Stats()
         self.totalHp = 1
         self.currentHp = 1
+        self.moveset = Moveset()
 
     def updateStats (self, hp=0, atk=0, defn=0, spAtk=0, spDefn=0, spd=0):
         self.stats = Stats(hp=hp, atk=atk, defn=defn, spAtk=spAtk, spDefn=spDefn, spd=spd)
-        percent = self.currentHp * 1.0 / self.totalHp
+        percent = self.currentHp / self.totalHp
         self.totalHp = hp
         self.currentHp = hp * percent
 
     def updateIVs (self, hp=0, atk=0, defn=0, spAtk=0, spDefn=0, spd=0):
         self.ivs = Stats(hp=hp, atk=atk, defn=defn, spAtk=spAtk, spDefn=spDefn, spd=spd)
+
+    def damage(self, pokemon, dmg=0):
+        self.currentHp -= dmg
 
 
 class Stats(object):
@@ -158,3 +168,21 @@ class Stats(object):
         self.spAtk = spAtk
         self.spDefn = spDefn
         self.spd = spd
+
+
+class Moveset (object):
+    def __init__(self):
+        self.one = Move()
+        self.two = Move()
+        self.three = Move()
+        self.four = Move()
+
+
+class Move (object):
+    def __init__(self, name='', power=0, accuracy=0, pp=0, type1='', effect=''):
+        self.name = name
+        self.power = power
+        self.accuracy = accuracy
+        self.pp = pp
+        self.type1 = type1
+        self.effect = effect
