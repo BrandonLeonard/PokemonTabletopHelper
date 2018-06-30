@@ -17,10 +17,6 @@
 # window.mainloop()
 
 
-def nick():
-    nick = Trainer('Nick')
-    createStandardPokes(nick)
-
 def modifier(targets=False, weather=1, critical=False, roll=12, STAB=False, typeEff=1, other=1):
     targetnum = 1
     criticalnum = 1
@@ -118,6 +114,11 @@ class Trainer(object):
         self.pokemon = {}
         self.items = []
 
+    def __str__(self):
+        return """name: {}
+        pokemon: {}
+        items: {}""".format(self.name, self.pokemon.keys(), self.items)
+
     def addItem(self, item=''):
         self.items.append(item)
 
@@ -131,12 +132,13 @@ class Trainer(object):
 class Pokemon(object):
     """docstring for Pokemon"""
 
-    def __init__(self, species = '', type1='', type2='', nickname = '', ability = ''):
+    def __init__(self, species = '', type1='', type2='', nickname = '', ability = '', level = 1):
         super(Pokemon, self).__init__()
         self.species = species
         self.nickname = nickname
         self.type1 = type1
         self.type2 = type2
+        self.level = level
         self.ability = ability
         self.stats = Stats()
         self.ivs = Stats()
@@ -144,7 +146,42 @@ class Pokemon(object):
         self.currentHp = 1
         self.moveset = Moveset()
 
-    def updateStats (self, hp=0, atk=0, defn=0, spAtk=0, spDefn=0, spd=0):
+    def __str__(self):
+        return """{} - {}
+        Lvl: {}
+        HP: {}
+        Type: {} {}
+        Ability: {}
+        Stats:  {}
+        IVs:  {}
+        Moves: {}
+        """.format(self.species, self.nickname, self.level, self.healthBar(), self.type1, self.type2, self.ability, self.stats, self.ivs, self.moveset)
+
+
+        """Charizard - Nickname
+        Lvl: 100
+        HP: 50/100  /###############=====/
+        Type: Fire/Flying
+        Ability: fdsfdsjkl - fdsljk jfkdlssfj f fjfsjfds  fjkdsjf 
+        Stats:  hp-100  atk-678  defn-789  spAtk-567  spDefn-567  spd-789
+        IVs:  hp-100  atk-678  defn-789  spAtk-567  spDefn-567  spd-789
+        """
+
+    def healthBar(self):
+        percent = self.currentHp / self.totalHp * 100
+        print(percent)
+        fill = int(percent/5)
+        print(fill)
+        fillstr = '     /'
+        for i in range(0, fill):
+            fillstr = fillstr + '#'
+        print(fillstr)
+        for i in range (fill, 20):
+            fillstr = fillstr + '='
+        print(fillstr)
+        return str(self.currentHp) + '/' + str(self.totalHp) + fillstr + '/   ' + str(percent) + '%'
+
+    def updateStats (self, hp=1, atk=1, defn=1, spAtk=1, spDefn=1, spd=1):
         self.stats = Stats(hp=hp, atk=atk, defn=defn, spAtk=spAtk, spDefn=spDefn, spd=spd)
         percent = self.currentHp / self.totalHp
         self.totalHp = hp
@@ -153,8 +190,20 @@ class Pokemon(object):
     def updateIVs (self, hp=0, atk=0, defn=0, spAtk=0, spDefn=0, spd=0):
         self.ivs = Stats(hp=hp, atk=atk, defn=defn, spAtk=spAtk, spDefn=spDefn, spd=spd)
 
-    def damage(self, pokemon, dmg=0):
-        self.currentHp -= dmg
+    def physicalDamage(self, pokemon, dmg=0, modifier=1):
+        levelMod = (2*self.level/5)+2
+        statCalc = (levelMod * dmg * pokemon.stats.atk / self.stats.defn)
+        loss = ((statCalc / 50) + 2) * modifier
+        self.currentHp -= loss
+
+    def specialDamage(self, pokemon, dmg=0, modifier=1):
+        levelMod = (2*self.level/5)+2
+        statCalc = (levelMod * dmg * pokemon.stats.spAtk / self.stats.spDefn)
+        loss = ((statCalc / 50) + 2) * modifier
+        self.currentHp -= loss
+
+    def percentDamage(self, percent=12.5):
+        self.currentHp -= percent * self.totalHp
 
 
 class Stats(object):
@@ -169,6 +218,9 @@ class Stats(object):
         self.spDefn = spDefn
         self.spd = spd
 
+    def __str__(self):
+        return 'hp-{}  atk-{}  defn-{}  spAtk-{}  spDefn-{}  spd-{}'.format(self.hp, self.atk, self.defn, self.spAtk, self.spDefn, self.spd)
+
 
 class Moveset (object):
     def __init__(self):
@@ -177,6 +229,11 @@ class Moveset (object):
         self.three = Move()
         self.four = Move()
 
+    def __str__(self):
+        return """{}
+        {}
+        {}
+        {}""".format(self.one, self.two, self.three, self.four)
 
 class Move (object):
     def __init__(self, name='', power=0, accuracy=0, pp=0, type1='', effect=''):
@@ -186,3 +243,7 @@ class Move (object):
         self.pp = pp
         self.type1 = type1
         self.effect = effect
+
+    def __str__(self):
+        return """{}  pow:{}  type:{}  acc:{}  pp:{}  desc:{}""".format(self.name, self.power, self.type1, self.accuracy, self.pp, self.effect)
+
